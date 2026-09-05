@@ -82,10 +82,15 @@ Alpine.data('searchableSelect', (config) => ({
             this.selected = item;
         }
 
-        this.search = '';
         this.open = false;
         this.results = [];
         this.highlighted = 0;
+
+        if (config.multiple) {
+            this.search = '';
+        } else {
+            this.search = item.name;
+        }
 
         if (config.submitOnSelect) {
             const form = this.$el.closest('form');

@@ -228,7 +228,18 @@ test('plotting mahasiswa auto-submit saat select (submitOnSelect)', function () 
 
     $this->actingAs($admin)->get(route('admin.schedules.edit', $schedule))
         ->assertOk()
-        ->assertSee('submitOnSelect: true', false);
+        ->assertSee('submitOnSelect: true', false)
+        ->assertSee('Plotting Mahasiswa');
+});
+
+test('halaman edit tidak memiliki form bersarang (jumlah <form> harus sama dengan </form>)', function () {
+    $admin = User::factory()->admin()->create();
+    $schedule = Schedule::factory()->create();
+
+    $html = $this->actingAs($admin)->get(route('admin.schedules.edit', $schedule))->content();
+    $openCount = substr_count($html, '<form');
+    $closeCount = substr_count($html, '</form>');
+    expect($openCount)->toBe($closeCount);
 });
 
 test('create jadwal dengan searchable component masih menyimpan dosen', function () {
@@ -344,6 +355,8 @@ test('search endpoint mengecualikan mahasiswa yang sudah di-plot pada context ed
         ->assertOk()
         ->json();
 
+    expect($res['data'])->toBeArray();
+    expect($res['data'])->toBeList();
     $ids = collect($res['data'])->pluck('id')->toArray();
     expect($ids)->not->toContain($assigned->id);
     expect($ids)->toContain($available->id);

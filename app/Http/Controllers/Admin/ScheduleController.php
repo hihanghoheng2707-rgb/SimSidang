@@ -32,7 +32,7 @@ class ScheduleController extends Controller
         $sortDir = in_array($sortDir, $allowedDir) ? $sortDir : 'desc';
 
         $schedules = Schedule::withCount('mahasiswas')
-            ->with(['dosens', 'jenisSidang'])
+            ->with(['dosens', 'jenisSidang', 'mahasiswas.prodi'])
             ->when($search, fn ($q, $s) => $q->where('nama_grup_sidang', 'like', "%$s%")->orWhere('ruangan', 'like', "%$s%"))
             ->when($jenisSidang, fn ($q, $v) => $q->where('jenis_sidang_id', $v))
             ->orderBy($sortBy, $sortDir)
@@ -180,7 +180,7 @@ class ScheduleController extends Controller
         }
 
         $hasMore = $users->count() > 20;
-        $users = $users->slice(0, 20);
+        $users = $users->slice(0, 20)->values();
 
         return response()->json([
             'data' => $users->map(fn ($u) => [

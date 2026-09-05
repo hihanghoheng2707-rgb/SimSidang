@@ -77,6 +77,19 @@ class UpdateScheduleRequest extends FormRequest
                     $validator->errors()->add('mahasiswas', $message);
                 }
             }
+
+            if ($schedule->jenis_sidang_id !== $this->jenis_sidang_id) {
+                $count = $schedule->submissions()
+                    ->whereHas('assessmentForms')
+                    ->withCount('assessmentForms')
+                    ->get()
+                    ->sum('assessment_forms_count');
+
+                if ($count > 0) {
+                    $validator->errors()->add('jenis_sidang_id',
+                        "Jenis sidang berubah. $count data nilai dosen akan dihapus.");
+                }
+            }
         });
     }
 }

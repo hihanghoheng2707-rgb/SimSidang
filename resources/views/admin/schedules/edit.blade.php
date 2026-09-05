@@ -121,7 +121,7 @@
             @error('dosens') <div class="mt-1 text-xs text-error-600 dark:text-error-500">{{ $message }}</div> @enderror
         </div>
 
-        <div class="mt-6 flex gap-3">
+<div class="mt-6 flex gap-3">
             <button type="submit"
                     class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-brand-600">
                 Perbarui
@@ -133,7 +133,7 @@
         </div>
     </form>
 
-    <hr class="my-6 border-gray-200 dark:border-gray-800">
+        <hr class="my-6 border-gray-200 dark:border-gray-800">
 
     <div id="plotting" class="mb-4 flex items-center justify-between">
         <h2 class="text-xl font-bold text-gray-800 dark:text-white/90">Plotting Mahasiswa</h2>
@@ -146,8 +146,8 @@
         <div x-data="searchableSelect({
             endpoint: '/admin/schedules/{{ $schedule->id }}/search-users?type=mahasiswa',
             multiple: false,
-            initialSelected: null,
-            submitOnSelect: true
+            submitOnSelect: true,
+            initialSelected: null
         })" class="relative">
             <input type="text"
                    x-model="search"

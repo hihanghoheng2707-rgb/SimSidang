@@ -42,6 +42,11 @@ class Schedule extends Model
         return $this->belongsToMany(User::class, 'schedule_mahasiswa', 'schedule_id', 'user_id');
     }
 
+    public function submissionBulkLogs(): HasMany
+    {
+        return $this->hasMany(SubmissionBulkLog::class, 'schedule_id');
+    }
+
     public function jenisSidang(): BelongsTo
     {
         return $this->belongsTo(JenisSidang::class, 'jenis_sidang_id');

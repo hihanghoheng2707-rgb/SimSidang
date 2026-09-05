@@ -188,7 +188,7 @@
 <table class="sig-table" style="margin-top: 24px;">
     <tr>
         <td></td>
-        <td style="text-align: right;">{{ 'Jombang, '.$tanggal }}</td>
+x        <td style="text-align: right;">{{ 'Jombang, '.$tanggal }}</td>
     </tr>
     <tr>
         <td></td>

@@ -58,6 +58,7 @@
                         </th>
                         <th class="px-4 py-3 font-medium">Jam</th>
                         <th class="px-4 py-3 font-medium">Dosen</th>
+                        <th class="px-4 py-3 font-medium">Jurusan</th>
                         <th class="px-4 py-3 font-medium">Jml Mahasiswa</th>
                         <th class="px-4 py-3 font-medium text-right">Aksi</th>
                     </tr>
@@ -93,6 +94,9 @@
                             <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $schedule->tanggal_sidang->format('d M Y') }}</td>
                             <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $schedule->jam_mulai->format('H:i') }} - {{ $schedule->jam_selesai->format('H:i') }}</td>
                             <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $schedule->dosens->pluck('name')->join(', ') ?: '-' }}</td>
+                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400">
+                                {{ $schedule->mahasiswas->first()?->prodi->nama_prodi ?? '-' }}
+                            </td>
                             <td class="px-4 py-3">
                                 @if($schedule->mahasiswas_count > 0)
                                     <a href="{{ route('admin.schedules.edit', $schedule) }}#plotting" class="font-medium text-brand-500 hover:underline dark:text-brand-400">{{ $schedule->mahasiswas_count }}</a>
@@ -119,7 +123,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada jadwal.</td>
+                            <td colspan="10" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada jadwal.</td>
                         </tr>
                     @endforelse
                 </tbody>
