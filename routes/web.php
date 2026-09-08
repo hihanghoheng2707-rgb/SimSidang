@@ -22,12 +22,14 @@ use App\Http\Controllers\Mahasiswa\PenilaianController as MahasiswaPenilaianCont
 use App\Http\Controllers\Mahasiswa\RevisionAttachmentController;
 use App\Http\Controllers\Mahasiswa\SubmissionController as MahasiswaSubmissionController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PanduanController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route('login'));
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/panduan', [PanduanController::class, 'index'])->name('panduan');
 
     Route::get('/files/submissions/{submission}', [FileController::class, 'submission'])->name('files.submission');
     Route::get('/files/attachments/{attachment}', [FileController::class, 'attachment'])->name('files.attachment');

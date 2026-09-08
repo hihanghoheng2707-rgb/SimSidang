@@ -32,6 +32,7 @@ Domain project ini berbahasa Indonesia (akademik), tapi konvensi Laravel biasany
 | Tanda Tangan Elektronik (QR) | QR code di lembar cetak penilaian, pengganti tanda tangan basah | — | `QrCodeService` (`signatureText`, `penilaianSignature`) | Isi QR: nama dosen + tanggal pemberian nilai (= `assessment_forms.created_at`, tidak berubah saat edit); PNG via GD + bacon-qr-code |
 | Nilai Penyebut (A) | Pembagi normalisasi skor total | `assessment_templates.nilai_penyebut` | — | integer, `min:1` |
 | Nilai Pengali (B) | Pengali/akar skala output skor total | `assessment_templates.nilai_pengali` | — | integer, `min:0` |
+| Panduan | Halaman panduan penggunaan sistem (user journey per role) | — | `PanduanController`, view `panduan/index.blade.php` | Route `/panduan`; accessible semua role via sidebar; konten statis step-by-step workflow |
 
 ## Status Submission (`submissions.status`)
 | Nilai enum | Arti Indonesia |
