@@ -58,20 +58,8 @@
                             </div>
                             <div class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap" x-html="formatContent(msg.content)"></div>
 
-                            <template x-if="msg.tool_calls && msg.tool_calls.length">
-                                <div class="mt-2 rounded-lg border border-gray-200 bg-gray-50 p-2 text-xs text-gray-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400">
-                                    <div class="mb-1 font-medium">Tool yang dipanggil:</div>
-                                    <template x-for="tc in msg.tool_calls" :key="tc.tool">
-                                        <div>
-                                            <span class="font-medium" x-text="tc.tool"></span>
-                                            <span class="ms-1 text-gray-400 dark:text-gray-500">→</span>
-                                            <pre class="mb-0 mt-1 rounded bg-gray-100 p-1 text-[0.7rem] text-gray-500 dark:bg-gray-800 dark:text-gray-400" x-text="formatToolResult(tc.result)"></pre>
-                                        </div>
-                                    </template>
-                                </div>
-                            </template>
+</div>
                         </div>
-                    </div>
                 </div>
             </template>
 

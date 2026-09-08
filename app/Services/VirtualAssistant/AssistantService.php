@@ -126,6 +126,11 @@ class AssistantService
                         'result' => $toolResult,
                     ];
 
+                    $conversation->messages()->create([
+                        'role' => 'tool',
+                        'content' => json_encode($toolResult, JSON_UNESCAPED_UNICODE),
+                    ]);
+
                     $messages[] = [
                         'role' => 'assistant',
                         'content' => $content,
@@ -218,6 +223,8 @@ class AssistantService
                 $messages[] = ['role' => 'user', 'content' => $msg->content];
             } elseif ($msg->role === 'assistant') {
                 $messages[] = ['role' => 'assistant', 'content' => $msg->content];
+            } elseif ($msg->role === 'tool') {
+                $messages[] = ['role' => 'tool', 'content' => $msg->content];
             }
         }
 

@@ -88,7 +88,6 @@ Alpine.data('chatAssistant', ({ conversationId, initialMessages = [] }) => ({
                 id: 'assistant-' + Date.now(),
                 role: 'assistant',
                 content: data.response,
-                tool_calls: data.tool_calls || [],
                 created_at: new Date().toISOString(),
             });
         } catch {
@@ -111,18 +110,6 @@ Alpine.data('chatAssistant', ({ conversationId, initialMessages = [] }) => ({
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML.replace(/\n/g, '<br>');
-    },
-
-    formatToolResult(result) {
-        if (!result) {
-            return '';
-        }
-        if (typeof result === 'object') {
-            return JSON.stringify(result, null, 2);
-        }
-        const div = document.createElement('div');
-        div.textContent = String(result);
-        return div.innerHTML;
     },
 
     formatDate(dateStr) {

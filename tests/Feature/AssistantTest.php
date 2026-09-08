@@ -238,11 +238,72 @@ test('asisten menyelesaikan tool-call loop (mock LLM mengembalikan tool request 
         'content' => 'Berdasarkan data, ada 1 submission dengan status pending.',
     ]);
 
+    $this->assertDatabaseHas('assistant_messages', [
+        'conversation_id' => $conversation->id,
+        'role' => 'tool',
+    ]);
+
     $toolMessage = AssistantMessage::where('conversation_id', $conversation->id)
         ->where('role', 'assistant')
         ->whereNotNull('tool_calls')
         ->first();
     expect($toolMessage)->not->toBeNull();
+});
+
+test('tool results disimpan sebagai role tool di database', function () {
+    $admin = User::factory()->create([
+        'role' => 'admin',
+        'username' => 'admin_tool_test',
+        'email' => 'admin_tool_test@test.local',
+    ]);
+    $schedule = Schedule::factory()->create();
+    $mahasiswa = User::factory()->mahasiswa()->create();
+    Submission::factory()->create([
+        'user_id' => $mahasiswa->id,
+        'schedule_id' => $schedule->id,
+        'status' => 'pending',
+    ]);
+    $conversation = AssistantConversation::factory()->create(['admin_id' => $admin->id]);
+
+    $mock = mock(LlmProviderInterface::class);
+    $mock->shouldReceive('chat')
+        ->once()
+        ->andReturn([
+            'choices' => [[
+                'message' => [
+                    'content' => null,
+                    'tool_calls' => [
+                        [
+                            'id' => 'call_test',
+                            'type' => 'function',
+                            'function' => [
+                                'name' => 'getStudentProgress',
+                                'arguments' => '{}',
+                            ],
+                        ],
+                    ],
+                ],
+            ]],
+        ]);
+    $mock->shouldReceive('chat')
+        ->once()
+        ->andReturn([
+            'choices' => [[
+                'message' => [
+                    'content' => 'Hasil analisis.',
+                    'tool_calls' => null,
+                ],
+            ]],
+        ]);
+    $this->app->instance(LlmProviderInterface::class, $mock);
+
+    $this->actingAs($admin)
+        ->postJson(route('admin.assistant.chat', $conversation->id), ['content' => 'Analisis']);
+
+    $this->assertDatabaseHas('assistant_messages', [
+        'conversation_id' => $conversation->id,
+        'role' => 'tool',
+    ]);
 });
 
 test('admin dapat membuat conversation baru', function () {

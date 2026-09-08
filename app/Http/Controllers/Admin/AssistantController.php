@@ -75,7 +75,6 @@ class AssistantController extends Controller
             return response()->json([
                 'success' => true,
                 'response' => $result['message'],
-                'tool_calls' => $result['tool_calls'],
                 'conversation_id' => $result['conversation_id'],
             ]);
         } catch (\Throwable $e) {
