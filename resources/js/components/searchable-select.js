@@ -68,6 +68,9 @@ Alpine.data('searchableSelect', (config) => ({
     },
 
     select(item) {
+        if (config.onSelect && config.onSelect(item) === false) {
+            return;
+        }
         if (config.multiple) {
             if (config.max && this.selected.length >= config.max) {
                 this.maxedOut = true;

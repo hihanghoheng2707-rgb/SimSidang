@@ -114,6 +114,8 @@ class QueryDataTool implements AssistantToolInterface
 
         if ($columns !== []) {
             $query->select($columns);
+        } else {
+            $query->select($this->guard->allowedColumns($tabel));
         }
 
         foreach ($arguments['filter'] ?? [] as $column => $value) {

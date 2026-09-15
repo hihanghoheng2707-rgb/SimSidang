@@ -58,8 +58,8 @@ Route::middleware(['auth'])->group(function () {
         ->group(function () {
             Route::get('/submissions', [DosenSubmissionController::class, 'index'])->name('submissions.index');
             Route::get('/submissions/{submission}', [DosenSubmissionController::class, 'show'])->name('submissions.show');
-            Route::post('/submissions/{submission}/ai-read', [AiSubmissionController::class, 'analyze'])->name('ai-read');
-            Route::post('/submissions/{submission}/ai-read/refresh', [AiSubmissionController::class, 'refresh'])->name('ai-read.refresh');
+            Route::post('/submissions/{submission}/ai-read', [AiSubmissionController::class, 'analyze'])->name('ai-read')->middleware('throttle:ai-read');
+            Route::post('/submissions/{submission}/ai-read/refresh', [AiSubmissionController::class, 'refresh'])->name('ai-read.refresh')->middleware('throttle:ai-read');
             Route::get('/submissions/{submission}/revision-notes/create', [DosenRevisionNoteController::class, 'create'])->name('revision-notes.create');
             Route::post('/submissions/{submission}/revision-notes', [DosenRevisionNoteController::class, 'store'])->name('revision-notes.store');
             Route::post('/submissions/{submission}/revision-notes/draft', [DosenRevisionNoteController::class, 'draft'])->name('revision-notes.draft');
@@ -117,7 +117,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/asisten/new', [AssistantController::class, 'createNew'])->name('assistant.new');
             Route::get('/asisten/conversations', [AssistantController::class, 'conversations'])->name('assistant.conversations');
             Route::get('/asisten/{conversation}', [AssistantController::class, 'show'])->name('assistant.show');
-            Route::post('/asisten/{conversation}/chat', [AssistantController::class, 'chat'])->name('assistant.chat')->middleware('throttle:assistant');
+            Route::post('/asisten/{conversation}/chat', [AssistantController::class, 'chat'])->name('assistant.chat')->middleware(['throttle:assistant', 'throttle:assistant_per_conversation']);
 
             // Prodi
             Route::get('/prodis', [ProdiController::class, 'index'])->name('prodis.index');

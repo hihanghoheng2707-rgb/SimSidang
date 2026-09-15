@@ -25,6 +25,16 @@ class ReadOnlyGuard
         $this->catalog->assertColumnsAllowed($table, $columns);
     }
 
+    public function blockedColumns(): array
+    {
+        return $this->catalog->blockedColumns();
+    }
+
+    public function allowedColumns(string $table): array
+    {
+        return $this->catalog->allowedColumns($table);
+    }
+
     public function sanitizeRawSql(string $sql): string
     {
         $sql = trim($sql);
@@ -59,7 +69,11 @@ class ReadOnlyGuard
             }
         }
 
-        foreach ($this->catalog->blockedColumns() as $column) {
+        if (preg_match('/SELECT\s+\*/i', $withoutLiterals) || preg_match('/\.\*/', $withoutLiterals)) {
+            throw new ReadOnlyViolationException('SELECT * tidak diizinkan — sebutkan kolom eksplisit (kolom sensitif diblokir).');
+        }
+
+        foreach (array_filter($this->catalog->blockedColumns(), fn ($col) => $col !== 'id') as $column) {
             if (preg_match('/\b'.preg_quote($column, '/').'\b/i', $withoutLiterals)) {
                 throw new ReadOnlyViolationException("Akses ke kolom '{$column}' tidak diizinkan.");
             }

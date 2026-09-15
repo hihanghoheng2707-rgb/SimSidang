@@ -7,6 +7,11 @@ use Illuminate\Support\Collection;
 
 class RekapNilaiService
 {
+    public function compute(array $filters = [], string $sort = 'desc'): array
+    {
+        return $this->computeRows($filters, $sort);
+    }
+
     public function getRows(array $filters = [], string $sort = 'desc'): array
     {
         return $this->computeRows($filters, $sort)['rows'];
@@ -14,9 +19,7 @@ class RekapNilaiService
 
     public function getChartData(array $filters = []): array
     {
-        $data = $this->computeRows($filters, 'desc');
-
-        return $data['chart'];
+        return $this->computeRows($filters, 'desc')['chart'];
     }
 
     protected function computeRows(array $filters, string $sort): array

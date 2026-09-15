@@ -6,13 +6,67 @@
 <div x-data="chatAssistant({ conversationId: @js($conversationId), initialMessages: @js($initialMessages ?? []) })" x-init="init()" class="flex flex-col">
     <div class="mb-4 flex items-center justify-between">
         <h1 class="text-xl font-bold text-gray-800 dark:text-white/90 sm:text-2xl">Asisten Virtual Admin</h1>
-        <a href="{{ route('admin.assistant.new') }}"
-           class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            Chat Baru
-        </a>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('admin.assistant.new') }}"
+               class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Chat Baru
+            </a>
+        </div>
+    </div>
+
+    <div x-data="{ open: true }" class="mb-4 rounded-xl border border-brand-200/50 bg-brand-500/5 dark:border-brand-800 dark:bg-brand-500/10">
+        <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center gap-2 text-sm font-medium text-brand-700 dark:text-brand-300">
+                <svg class="h-5 w-5 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16v-4m0-4h.01"></path>
+                </svg>
+                Kemampuan &amp; Batasan Asisten Virtual
+            </div>
+            <button type="button" @click="open = !open"
+                    class="rounded-lg p-1 text-brand-600 transition hover:bg-brand-500/10 dark:text-brand-400">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                     x-show="open">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                </svg>
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                     x-show="!open" x-cloak>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div x-show="open" x-cloak class="border-t border-brand-200/50 px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+            <p class="mb-2">Asisten Virtual Admin dapat <strong class="font-medium">membaca data agregat sistem secara read-only</strong> untuk menjawab pertanyaan Anda.</p>
+
+            <div class="mb-2 space-y-1.5">
+                <p class="font-medium text-gray-800 dark:text-white/90">✓ Bisa:</p>
+                <ul class="list-disc list-inside space-y-0.5 text-xs text-gray-600 dark:text-gray-400">
+                    <li>Query agregat: progres mahasiswa per status, beban/dosen, poin revisi terjebak, ringkasan jadwal sidang.</li>
+                    <li>Query terstruktur &amp; SQL SELECT mentah pada 11 tabel domain (users, prodis, schedules, submissions, revision_notes, ...).</li>
+                    <li>Filter, group-by, sort — maks {{ config('assistant.query.max_rows', 50) }} baris per respons.</li>
+                    <li>Menyimpan riwayat chat per admin beserta log tool call untuk audit.</li>
+                    <li>Jawaban dalam Bahasa Indonesia; rate limit {{ config('assistant.rate_limit.per_minute', 10) }}/menit per admin.</li>
+                </ul>
+            </div>
+
+            <div class="mb-2 space-y-1.5">
+                <p class="font-medium text-gray-800 dark:text-white/90">✗ Tidak bisa:</p>
+                <ul class="list-disc list-inside space-y-0.5 text-xs text-gray-600 dark:text-gray-400">
+                    <li><strong>Ubah/insert/delete data</strong> — tidak ada tool write; semua query dijalankan dalam transaksi roll-back otomatis.</li>
+                    <li><strong>Melihat kolom sensitif user</strong>: id, password, remember_token, two_factor_*, dan kolom yang di-blocklist di `config/assistant.php`.</li>
+                    <li>Query ke tabel sistem: cache, jobs, sessions, migrations, password_reset_tokens.</li>
+                    <li>Eksekusi non-SELECT (INSERT/UPDATE/DELETE/DROP/ALTER), multi-statement, komentar, kata kunci berbahaya (INTO OUTFILE, SLEEP, ...).</li>
+                    <li>SELECT * — kolom sensitif otomatis disingkirkan; hanya kolom yang diizinkan yang dikembalikan.</li>
+                    <li>Menganalisa isi dokumen laporan PDF (fitur terpisah: "Baca dengan AI" di halaman dosen).</li>
+                </ul>
+            </div>
+
+            <p class="text-xs italic">Catatan: Asisten ini bukan pengganti transaksi manusia. Selalu verifikasi data penting melalui UI admin.</p>
+        </div>
     </div>
 
     <div class="flex max-h-[70vh] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
@@ -28,14 +82,14 @@
                 <div class="py-5 text-center text-gray-500 dark:text-gray-400">
                     <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-brand-500/10 dark:bg-brand-500/15">
                         <svg class="h-7 w-7 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.8125 2C5.47917 2 2 5.47917 2 9.8125c0 4.334 3.479 7.8125 7.8125 7.8125 1.29 0 2.5 0.305 3.55-0.81l.03-.02c.87-.74 1.22-1.94 1.28-3.13.03-.62.05-1.24.05-1.88"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.8125 2C5.47917 2 5.47917 2 9.8125 2c4.334 0 7.8125 3.479 7.8125 7.8125 0 4.334-3.479 7.8125-7.8125 7.8125-1.29 0-2.5-.305-3.55-.81l-.03-.02c-.87-.74-1.22-1.94-1.28-3.13-.03-.62-.05-1.24-.05-1.88"></path>
                             <path fill="currentColor" d="M14 9a5 5 0 105 5 5 5 0 01-5-5z"></path>
                         </svg>
                     </div>
                     <p class="mb-1 font-medium">Hai! Saya Asisten Virtual SIMSIDANG.</p>
                     <p class="text-sm mb-0">
-                        Saya bisa membantu menganalisis data sidang secara agregat.<br>
-                        Tanyakan tentang progres mahasiswa, beban dosen, revisi terjebak, atau ringkasan jadwal.
+                        Tanyakan tentang progres mahasiswa, beban dosen, revisi terjebak, atau ringkasan jadwal.<br>
+                        <span class="italic">Baca kemampuan &amp; batasan di kotak di atas.</span>
                     </p>
                 </div>
             </template>

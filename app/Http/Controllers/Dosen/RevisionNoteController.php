@@ -17,7 +17,7 @@ class RevisionNoteController extends Controller
     {
         $this->authorize('view', $submission);
 
-        $submission->load('revisionNotes.dosen');
+        $submission->load(['revisionNotes.dosen', 'revisionNotes.attachments']);
 
         $draft = $request->session()->pull('ai_revision_draft.'.$submission->id, []);
         $defaultRevision = collect($draft)->map(fn ($p, $i) => ($i + 1).'. '.$p)->implode("\n");

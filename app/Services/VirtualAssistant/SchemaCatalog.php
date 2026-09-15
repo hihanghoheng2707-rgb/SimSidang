@@ -56,9 +56,11 @@ class SchemaCatalog
 
     public function assertColumnsAllowed(string $table, array $columns): void
     {
+        $blocked = config("assistant.query.blocked_columns.{$table}", []);
+
         foreach ($columns as $column) {
-            if (in_array($column, $this->blockedColumns(), true)) {
-                throw new ReadOnlyViolationException("Akses ke kolom '{$column}' tidak diizinkan.");
+            if (in_array($column, $blocked, true)) {
+                throw new ReadOnlyViolationException("Akses ke kolom '{$column}' pada tabel '{$table}' tidak diizinkan.");
             }
         }
     }

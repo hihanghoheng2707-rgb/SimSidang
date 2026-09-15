@@ -21,14 +21,16 @@ class PenilaianController extends Controller
 
         $sebagaiPenguji = Submission::with(['user', 'schedule.jenisSidang', 'assessmentForms' => fn ($q) => $q
             ->where('dosen_id', $user->id)
-            ->where('tipe_penilai', 'penguji')])
+            ->where('tipe_penilai', 'penguji')
+            ->with(['dosen', 'template'])])
             ->whereHas('schedule.dosens', fn ($q) => $q->where('users.id', $user->id))
             ->orderByDesc('created_at')
             ->get();
 
         $sebagaiPembimbing = Submission::with(['user', 'schedule.jenisSidang', 'assessmentForms' => fn ($q) => $q
             ->where('dosen_id', $user->id)
-            ->where('tipe_penilai', 'dospem')])
+            ->where('tipe_penilai', 'dospem')
+            ->with(['dosen', 'template'])])
             ->whereIn('user_id', $user->mahasiswaBimbingan()->pluck('users.id'))
             ->orderByDesc('created_at')
             ->get();
@@ -133,12 +135,13 @@ class PenilaianController extends Controller
 
         $assessmentForm->load([
             'submission.user.prodi.fakultas',
+            'submission.user.dosenPembimbingByUrutan.prodi',
             'submission.schedule.jenisSidang',
             'dosen',
             'template',
         ]);
 
-        $dospem = $assessmentForm->submission->user->dosenPembimbingByUrutan ?? collect();
+        $dospem = $assessmentForm->submission->user->dosenPembimbingByUrutan;
 
         return Pdf::loadView('penilaian.cetak', [
             'assessmentForm' => $assessmentForm,

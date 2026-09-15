@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreScheduleImportRequest;
 use App\Http\Requests\StoreScheduleMahasiswaRequest;
 use App\Http\Requests\StoreScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
@@ -98,7 +99,7 @@ class ScheduleController extends Controller
         return back()->with('success', 'Jadwal berhasil dihapus.');
     }
 
-    public function import(Request $request)
+    public function import(StoreScheduleImportRequest $request)
     {
         $this->authorize('viewAdminMenu', User::class);
 
@@ -163,6 +164,7 @@ class ScheduleController extends Controller
         }
 
         $query = User::where('role', $type)
+            ->with('prodi:id,nama_prodi')
             ->when($term, fn ($q, $t) => $q->where(function ($sub) use ($t) {
                 $sub->where('name', 'like', "%{$t}%")
                     ->orWhere('username', 'like', "%{$t}%");
@@ -173,6 +175,7 @@ class ScheduleController extends Controller
         $users = $query->get();
 
         if ($schedule) {
+            $schedule->loadMissing(['dosens:id', 'mahasiswas:id']);
             $excludeIds = $type === 'dosen'
                 ? $schedule->dosens->pluck('id')
                 : $schedule->mahasiswas->pluck('id');
@@ -187,6 +190,8 @@ class ScheduleController extends Controller
                 'id' => $u->id,
                 'name' => $u->name,
                 'username' => $u->username,
+                'prodi_id' => $u->prodi_id,
+                'prodi_nama' => $u->prodi?->nama_prodi,
                 'label' => "{$u->name} ({$u->username})",
             ]),
             'has_more' => $hasMore,

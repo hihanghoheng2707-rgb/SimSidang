@@ -31,7 +31,6 @@ class StorePembimbingRequest extends FormRequest
                 return;
             }
 
-            $mahasiswaProdi = $submission->user->prodi_id;
             $dosenIds = array_values(array_filter($this->input('dosen_id', []), fn ($v) => $v !== null && $v !== ''));
 
             foreach ($dosenIds as $index => $dosenId) {
@@ -42,10 +41,6 @@ class StorePembimbingRequest extends FormRequest
 
                 if (! $dosen->isDosen()) {
                     $validator->errors()->add("dosen_id.{$index}", 'Pembimbing harus berperan dosen.');
-                }
-
-                if ($dosen->prodi_id !== $mahasiswaProdi) {
-                    $validator->errors()->add("dosen_id.{$index}", 'Dosen harus dari program studi yang sama dengan mahasiswa.');
                 }
             }
 

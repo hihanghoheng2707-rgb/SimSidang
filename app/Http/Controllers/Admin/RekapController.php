@@ -24,8 +24,9 @@ class RekapController extends Controller
         $jenisSidangs = JenisSidang::all();
         $sort = $request->input('sort', 'desc');
 
-        $rows = $service->getRows($filters, $sort);
-        $chartData = $service->getChartData($filters);
+        $result = $service->compute($filters, $sort);
+        $rows = $result['rows'];
+        $chartData = $result['chart'];
 
         return view('admin.rekap.nilai', compact('fakultas', 'prodis', 'jenisSidangs', 'filters', 'sort', 'rows', 'chartData'));
     }

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 test('sanitizeRawSql menerima SELECT sederhana', function () {
     $guard = app(ReadOnlyGuard::class);
 
-    $sql = $guard->sanitizeRawSql('SELECT * FROM submissions');
+    $sql = $guard->sanitizeRawSql('SELECT name FROM users');
 
     expect($sql)->toContain('SELECT');
 });
@@ -17,7 +17,7 @@ test('sanitizeRawSql menerima SELECT sederhana', function () {
 test('sanitizeRawSql memaksa LIMIT maksimum row', function () {
     $guard = app(ReadOnlyGuard::class);
 
-    $sql = $guard->sanitizeRawSql('SELECT * FROM submissions');
+    $sql = $guard->sanitizeRawSql('SELECT name FROM users');
 
     expect(str_contains($sql, 'LIMIT 50'))->toBeTrue();
 });
@@ -57,10 +57,17 @@ test('sanitizeRawSql menolak kolom sensitif', function () {
         ->toThrow(ReadOnlyViolationException::class, 'password');
 });
 
+test('sanitizeRawSql menolak SELECT *', function () {
+    $guard = app(ReadOnlyGuard::class);
+
+    expect(fn () => $guard->sanitizeRawSql('SELECT * FROM submissions'))
+        ->toThrow(ReadOnlyViolationException::class, 'SELECT *');
+});
+
 test('sanitizeRawSql mengizinkan string literal yang memuat kata terlarang', function () {
     $guard = app(ReadOnlyGuard::class);
 
-    $sql = $guard->sanitizeRawSql("SELECT * FROM submissions WHERE catatan_revisi = 'create table'");
+    $sql = $guard->sanitizeRawSql("SELECT catatan_revisi FROM revision_notes WHERE catatan_revisi = 'create table'");
 
     expect(str_contains($sql, 'catatan_revisi'))->toBeTrue();
 });

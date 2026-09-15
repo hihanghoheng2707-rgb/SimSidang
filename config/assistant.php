@@ -11,6 +11,7 @@ return [
     ],
     'rate_limit' => [
         'per_minute' => env('ASSISTANT_RATE_PER_MINUTE', 10),
+        'ai_read_per_minute' => env('ASSISTANT_AI_READ_PER_MINUTE', 3),
         'per_conversation' => env('ASSISTANT_RATE_PER_CONVERSATION', 50),
     ],
     'query' => [
@@ -18,7 +19,7 @@ return [
         'max_rows' => (int) env('ASSISTANT_QUERY_MAX_ROWS', 50),
         'raw_sql_enabled' => env('ASSISTANT_RAW_SQL_ENABLED', true),
         'blocked_columns' => [
-            'users' => ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes', 'two_factor_confirmed_at'],
+            'users' => ['id', 'password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes', 'two_factor_confirmed_at'],
         ],
         'blocked_tables' => ['cache', 'cache_locks', 'jobs', 'job_batches', 'failed_jobs', 'sessions', 'migrations', 'password_reset_tokens'],
     ],

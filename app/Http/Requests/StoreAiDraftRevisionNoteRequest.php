@@ -15,7 +15,7 @@ class StoreAiDraftRevisionNoteRequest extends FormRequest
     {
         return [
             'points' => ['required', 'array', 'min:1'],
-            'points.*' => ['required', 'string'],
+            'points.*' => ['required', 'string', 'max:2000'],
         ];
     }
 

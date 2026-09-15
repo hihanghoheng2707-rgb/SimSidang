@@ -59,10 +59,11 @@
 
     <x-status-history :submission="$submission" />
 
-<h2 class="mb-3 mt-6 text-lg font-semibold text-gray-800 dark:text-gray-200">Dosen Pembimbing</h2>
+    <h2 class="mb-3 mt-6 text-lg font-semibold text-gray-800 dark:text-gray-200">Dosen Pembimbing</h2>
     @php
         $pembimbing = $submission->user->dosenPembimbingByUrutan ?? collect();
         $pembimbingData = $pembimbing->map(fn($d) => ['id'=>$d->id, 'name'=>$d->name, 'username'=>$d->username])->values()->toArray();
+        $mhsProdiId = $submission->user->prodi_id;
     @endphp
     <form method="POST" action="{{ route('admin.submissions.pembimbing.store', $submission) }}" class="max-w-3xl space-y-4">
         @csrf
@@ -73,7 +74,16 @@
                     endpoint: '/admin/schedules/search-users?type=dosen',
                     multiple: true,
                     initialSelected: @js($pembimbingData),
-                    max: 2
+                    max: 2,
+                    onSelect(item) {
+                        if ({{ $mhsProdiId }} && item.prodi_id && item.prodi_id != {{ $mhsProdiId }}) {
+                            const namaProdi = item.prodi_nama || 'produk lain';
+                            if (!confirm('Dosen ini dari program studi "' + namaProdi + '", berbeda dengan mahasiswa (' + item.name + '). Lanjutkan?')) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
                 })" class="relative">
                     <div x-show="selected.length" class="mb-2 flex flex-wrap gap-1.5">
                         <template x-for="(item, index) in selected" :key="item.id">

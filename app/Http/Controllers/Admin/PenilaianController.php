@@ -43,12 +43,13 @@ class PenilaianController extends Controller
 
         $assessmentForm->load([
             'submission.user.prodi.fakultas',
+            'submission.user.dosenPembimbingByUrutan.prodi',
             'submission.schedule.jenisSidang',
             'dosen',
             'template',
         ]);
 
-        $dospem = $assessmentForm->submission->user->dosenPembimbingByUrutan ?? collect();
+        $dospem = $assessmentForm->submission->user->dosenPembimbingByUrutan;
 
         return Pdf::loadView('penilaian.cetak', [
             'assessmentForm' => $assessmentForm,

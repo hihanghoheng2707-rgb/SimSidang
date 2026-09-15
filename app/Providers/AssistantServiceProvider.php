@@ -41,6 +41,14 @@ class AssistantServiceProvider extends ServiceProvider
 
     protected function configureRateLimiting(): void
     {
+        RateLimiter::for('ai-read', function (Request $request) {
+            $perMinute = config('assistant.rate_limit.ai_read_per_minute', 3);
+
+            return $perMinute > 0
+                ? Limit::perMinute($perMinute)->by($request->user()->id ?? $request->ip())
+                : Limit::none();
+        });
+
         RateLimiter::for('assistant_per_conversation', function (Request $request) {
             $perConv = config('assistant.rate_limit.per_conversation', 50);
 

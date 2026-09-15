@@ -19,6 +19,13 @@ class StoreRevisionAttachmentRequest extends FormRequest
         ];
     }
 
+    public function withValidator($validator): void
+    {
+        if (! $this->hasFile('file') && empty($this->input('keterangan_mahasiswa'))) {
+            $validator->errors()->add('file', 'Minimal satu lampiran atau keterangan harus diisi.');
+        }
+    }
+
     public function messages(): array
     {
         return [

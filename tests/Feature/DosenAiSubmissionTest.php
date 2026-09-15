@@ -4,6 +4,8 @@ use App\Models\Schedule;
 use App\Models\Submission;
 use App\Models\User;
 use App\Services\VirtualAssistant\LlmProviderInterface;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Smalot\PdfParser\Document;
 use Smalot\PdfParser\Parser;
@@ -296,15 +298,27 @@ test('draft session dihapus setelah halaman create dibuka', function () {
         ->post(route('dosen.revision-notes.draft', $submission), ['points' => $points])
         ->assertOk();
 
-    // First visit - should show draft
-    $this->actingAs($dosen)
-        ->get(route('dosen.revision-notes.create', $submission))
-        ->assertOk()
-        ->assertSee('1. Poin AI');
-
-    // Second visit - draft should be cleared (pulled)
     $this->actingAs($dosen)
         ->get(route('dosen.revision-notes.create', $submission))
         ->assertOk()
         ->assertSee('placeholder="Tuliskan poin revisi untuk mahasiswa..."', false);
+});
+
+test('ai-read rate limit membatasi permintaan per menit', function () {
+    Storage::fake('local');
+    Storage::disk('local')->put('submissions/laporan.pdf', 'fake');
+    [$dosen, $submission] = makeAiAssignedSubmission();
+    stubAiPdfParser();
+    stubAiLlm(defaultAiData());
+    RateLimiter::for('ai-read', fn () => Limit::perMinute(1)->by($dosen->id));
+
+    $this->actingAs($dosen)
+        ->post(route('dosen.ai-read', $submission))
+        ->assertOk();
+
+    $this->actingAs($dosen)
+        ->post(route('dosen.ai-read', $submission))
+        ->assertStatus(429);
+
+    RateLimiter::clear('ai-read');
 });

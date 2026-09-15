@@ -60,8 +60,29 @@ class RunSqlQueryTool implements AssistantToolInterface
         }
 
         return [
-            'data' => $data,
+            'data' => $this->stripSensitiveColumns($data),
             'total_rows' => count($data),
         ];
+    }
+
+    protected function stripSensitiveColumns(array $rows): array
+    {
+        $blocked = $this->guard->blockedColumns();
+
+        if ($blocked === [] || $rows === []) {
+            return $rows;
+        }
+
+        $blocked = array_flip($blocked);
+
+        return array_map(function ($row) use ($blocked) {
+            foreach (get_object_vars($row) as $key => $value) {
+                if (array_key_exists($key, $blocked)) {
+                    unset($row->{$key});
+                }
+            }
+
+            return $row;
+        }, $rows);
     }
 }

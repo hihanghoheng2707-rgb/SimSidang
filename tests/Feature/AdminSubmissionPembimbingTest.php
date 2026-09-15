@@ -7,14 +7,16 @@ use App\Models\User;
 function scenarioPembimbing(): array
 {
     $prodi = Prodi::factory()->create();
+    $prodiLain = Prodi::factory()->create();
     $admin = User::factory()->admin()->create();
     $mahasiswa = User::factory()->mahasiswa()->create(['prodi_id' => $prodi->id]);
     $dosen1 = User::factory()->dosen()->create(['prodi_id' => $prodi->id]);
     $dosen2 = User::factory()->dosen()->create(['prodi_id' => $prodi->id]);
     $dosen3 = User::factory()->dosen()->create(['prodi_id' => $prodi->id]);
+    $dosenCrossProdi = User::factory()->dosen()->create(['prodi_id' => $prodiLain->id]);
     $submission = Submission::factory()->create(['user_id' => $mahasiswa->id]);
 
-    return compact('prodi', 'admin', 'mahasiswa', 'dosen1', 'dosen2', 'dosen3', 'submission');
+    return compact('prodi', 'prodiLain', 'admin', 'mahasiswa', 'dosen1', 'dosen2', 'dosen3', 'dosenCrossProdi', 'submission');
 }
 
 test('admin dapat melihat section assign dosen pembimbing di detail submission', function () {
@@ -79,17 +81,19 @@ test('validasi menolak dosen pembimbing I dan II sama', function () {
     $response->assertSessionHasErrors('dosen_id');
 });
 
-test('validasi menolak dosen dengan prodi berbeda dari mahasiswa', function () {
+test('dosen beda prodi tetap bisa diplot sebagai pembimbing (popup confirm di UI, server-allow)', function () {
     $s = scenarioPembimbing();
-    $prodiLain = Prodi::factory()->create();
-    $dosenLain = User::factory()->dosen()->create(['prodi_id' => $prodiLain->id]);
 
-    $response = $this->actingAs($s['admin'])->fromRoute('admin.submissions.show', $s['submission'])
-        ->post(route('admin.submissions.pembimbing.store', $s['submission']), [
-            'dosen_id' => [$dosenLain->id],
-        ]);
+    $response = $this->actingAs($s['admin'])->post(route('admin.submissions.pembimbing.store', $s['submission']), [
+        'dosen_id' => [$s['dosenCrossProdi']->id],
+    ]);
 
-    $response->assertSessionHasErrors('dosen_id.0');
+    $response->assertRedirect(route('admin.submissions.show', $s['submission']));
+    $this->assertDatabaseHas('pembimbingan', [
+        'mahasiswa_id' => $s['mahasiswa']->id,
+        'dosen_id' => $s['dosenCrossProdi']->id,
+        'urutan' => 1,
+    ]);
 });
 
 test('validasi menolak user non-dosen sebagai pembimbing', function () {
@@ -256,4 +260,29 @@ test('card pembimbing menggunakan overflow-visible agar dropdown tidak ter-clip'
 
     expect(strpos($html, 'class="overflow-visible rounded-2xl border'))->not->toBeFalse();
     expect(strpos($html, 'overflow-hidden'))->toBeFalse();
+});
+
+test('search endpoint include prodi_id dan prodi_nama untuk popup confirm beda prodi', function () {
+    $s = scenarioPembimbing();
+
+    $res = $this->actingAs($s['admin'])
+        ->get(route('admin.schedules.search-users', ['type' => 'dosen', 'term' => $s['dosen1']->name]))
+        ->assertOk()
+        ->json();
+
+    $item = collect($res['data'])->firstWhere('id', $s['dosen1']->id);
+    expect($item)->not->toBeNull();
+    expect($item['prodi_id'])->toBe($s['dosen1']->prodi_id);
+    expect($item['prodi_nama'])->toBeString();
+});
+
+test('detail submission render onSelect confirm untuk dosen beda prodi', function () {
+    $s = scenarioPembimbing();
+
+    $html = $this->actingAs($s['admin'])->get(route('admin.submissions.show', $s['submission']))
+        ->assertOk()
+        ->getContent();
+
+    expect(strpos($html, 'onSelect'))->not->toBeFalse();
+    expect(strpos($html, 'berbeda dengan mahasiswa'))->not->toBeFalse();
 });
